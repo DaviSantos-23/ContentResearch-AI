@@ -87,6 +87,7 @@ Cada solicitação processada pode produzir quatro conteúdos:
 | LinkedIn   | Conteúdo profissional         |
 | Newsletter | Texto informativo para e-mail |
 | YouTube    | Roteiro para vídeo            |
+| Twitter    | Pronto para Aplicação         |
 
 Os quatro resultados são armazenados na pasta criada pelo sistema.
 
