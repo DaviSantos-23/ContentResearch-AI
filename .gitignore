@@ -1,0 +1,21 @@
+
+# Credenciais e segredos
+.env
+.env.*
+!.env.example
+credentials.json
+token.json
+*.pem
+*.key
+
+# Arquivos temporários
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+
+# Python, caso seja utilizado
+__pycache__/
+*.py[cod]
+.venv/
+venv/

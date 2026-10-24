@@ -1,0 +1,1378 @@
+{
+  "name": "new telegram",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {
+          "download": true,
+          "imageSize": "large"
+        }
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        1008
+      ],
+      "id": "cdf5b552-82c6-4ebd-9fd6-c9d5cf1920f9",
+      "name": "Telegram Trigger",
+      "webhookId": "df257ed7-709d-4fa6-bf60-b157d10b0a37",
+      "credentials": {
+        "telegramApi": {
+          "id": "3I7GFwBU9ehhQew4",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b0988b06-7e73-4646-a97c-32c812646b4c",
+              "leftValue": "={{ $json.message.voice }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        224,
+        1008
+      ],
+      "id": "33913f35-bcff-45c0-8ce0-592fa0fb1ad5",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        448,
+        912
+      ],
+      "id": "aeffe650-e8c2-4942-98ab-99c834c010f7",
+      "name": "Get a file",
+      "webhookId": "06c5b083-e631-4504-b34d-e90215ea16fc",
+      "credentials": {
+        "telegramApi": {
+          "id": "3I7GFwBU9ehhQew4",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        672,
+        912
+      ],
+      "id": "a6485a84-4653-491f-9d59-268a15c97a71",
+      "name": "Transcribe a recording",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "FzX5bnxNDugJc8HZ",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bc8f2fac-22ac-4d54-8fd6-76dca883db19",
+              "name": "texto",
+              "value": "={{ $json.content.parts[0].text }}",
+              "type": "string"
+            },
+            {
+              "id": "f9588677-53fe-4f5e-853d-79c1d97cdd8c",
+              "name": "chat_id",
+              "value": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        896,
+        912
+      ],
+      "id": "cbf0ba43-7c77-4366-b45d-abdd460048fa",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bc8f2fac-22ac-4d54-8fd6-76dca883db19",
+              "name": "texto",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            },
+            {
+              "id": "f9588677-53fe-4f5e-853d-79c1d97cdd8c",
+              "name": "chat_id",
+              "value": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        896,
+        1104
+      ],
+      "id": "e9feb10b-a4db-46e5-a8cc-d9739a6b005e",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1120,
+        1008
+      ],
+      "id": "1d157148-387f-4b5a-935b-ce1663090c15",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.texto }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "tema",
+              "description": "O tema principal do conteudo em uma frase curta",
+              "required": true
+            },
+            {
+              "name": "plataformas",
+              "description": "A plataforma onde será publicado o conteudo. LinkedIn, Instagram, YouTube ou Twitter. se não especificar retorne todas.",
+              "required": true
+            },
+            {
+              "name": "tom",
+              "description": "tom desejado: Didático, Descritivo, Tecnico, Inspiracional etc...",
+              "required": true
+            },
+            {
+              "name": "publico_alvo",
+              "description": "Público do alvo no conteudo, se não especificado, inferir do tema.",
+              "required": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        1344,
+        1008
+      ],
+      "id": "32ac443a-eb55-4365-b9b5-a7669da31e3c",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "query": "={{ $json.output.tema }}",
+        "options": {
+          "topic": "news",
+          "search_depth": "advanced",
+          "max_results": 3,
+          "days": 3,
+          "include_answer": "advanced"
+        }
+      },
+      "type": "@tavily/n8n-nodes-tavily.tavily",
+      "typeVersion": 1,
+      "position": [
+        1696,
+        1008
+      ],
+      "id": "be4af779-7dfb-42dd-9a5d-7cd61dd7df67",
+      "name": "Search",
+      "credentials": {
+        "tavilyApi": {
+          "id": "zSkbHWNOpJmDmQqN",
+          "name": "Tavily account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "qwen/qwen3.8-27b",
+        "options": {
+          "maxTokensToSample": 1500
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1536,
+        1344
+      ],
+      "id": "8be220a3-4921-42ef-99d2-1cbc1a294ceb",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "JLunU5A85fhpAW8T",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chunkSize": 4000,
+        "chunkOverlap": 2000,
+        "options": {
+          "summarizationMethodAndPrompts": {
+            "values": {
+              "summarizationMethod": "stuff",
+              "prompt": "Você é um pesquisador. Sintetize os princiáis insights e dados da pesquisa abaixo em 5-7 bullets curtos em PT-BR. Foque em tendências, dados concretos,  ângulos interessantes.\n\nPesquisa:\n\"{text}\"\n\nINSIGHTS:"
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainSummarization",
+      "typeVersion": 2.1,
+      "position": [
+        1936,
+        1008
+      ],
+      "id": "a800d198-ae0d-4eee-8645-f44aaa52d521",
+      "name": "Summarization Chain"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Briefing: \n\n Tema: {{ $('Information Extractor').item.json.output.tema }}\n\nPublico-Alvo: {{ $('Information Extractor').item.json.output.publico_alvo }}\n\nTom: {{ $('Information Extractor').item.json.output.tom }}\n\nPlataforma: {{ $('Information Extractor').item.json.output.plataformas }}\n\n{{ $json.answer }}\n\n{{ $json.results\n  .filter(r => r.score > 0.55)\n  .slice(0, 3)\n  .map(r => r.title + ': ' + r.content.slice(0, 700))\n  .join('\\n\\n') }}\n",
+        "hasOutputParser": true,
+        "needsFallback": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Você é o Diretor Criativo de uma agência de social media de elite. Recebeu um\nbriefing e dados de pesquisa. Sua tarefa: definir a ESTRATÉGIA EDITORIAL antes\nque os redatores produzam o conteúdo.\nPara cada formato (Vídeo, LinkedIn, Instagram, Twitter, Newsletter), escolha o\nsub-formato mais apropriado considerando: natureza do tema, público alvo,\ntrends de cada plataforma, profundidade do conteúdo.\nSub-formatos disponiveis:\n- Video: \"youtube_longo\" OU \"reels_shorts\"\n- LinkedIn: \"post_texto\" OU \"carrossel_pdf\"\n- Instagram: \"carrossel\" OU \"stories\" OU \"post_estatico\"\n- Twitter: \"thread\" OU \"post_viral\"\n- Newsletter: \"normal\" OU \"breaking_curto\"\nTambém defina:\n- estrategia_geral: abordagem editorial unificadora\n- angulo_unico: o twist/insight central que vai amarrar todas as peças\n- tom_geral: 1 palavra unificadora (didático, provocativo, inspiracional,\ntécnico, irreverente)\nRetorne JSON estrito. Justifique cada escolha em 1 frase.\n\n"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        2288,
+        1008
+      ],
+      "id": "783a3f51-06f3-4992-9f4d-5471fa061109",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite",
+        "options": {
+          "maxOutputTokens": 1500,
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        2032,
+        1312
+      ],
+      "id": "96257507-e0b6-406d-aab4-0ca9c428055b",
+      "name": "Google Gemini Chat Model",
+      "notesInFlow": false,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "FzX5bnxNDugJc8HZ",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ $today.format('yyyy-MM-dd') }} - {{ $('Information Extractor').item.json.output.tema }}",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1mn7Ky52YeKcCrOwMt0CDtQLO-j9H7lT7",
+          "mode": "list",
+          "cachedResultName": "camisa 10",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1mn7Ky52YeKcCrOwMt0CDtQLO-j9H7lT7"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2640,
+        1008
+      ],
+      "id": "0d528e82-c10e-4ed2-bbc9-d340e7e08ce5",
+      "name": "Create folder",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "qusX6GylAkmdXjxU",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"estrategia_geral\": \"texto\",\n  \"angulo_unico\": \"texto\",\n  \"tom_geral\": \"didatico\",\n  \"video\": { \"formato\": \"youtube_longo\", \"justificativa\": \"texto\" },\n  \"linkedin\": { \"formato\": \"post_texto\", \"justificativa\": \"texto\" },\n  \"instagram\": { \"formato\": \"carrossel\", \"justificativa\": \"texto\" },\n  \"twitter\": { \"formato\": \"thread\", \"justificativa\": \"texto\" },\n  \"newsletter\": { \"formato\": \"normal\", \"justificativa\": \"texto\" }\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2560,
+        1232
+      ],
+      "id": "d350c53b-3984-4dad-a3e4-64b606deb1d9",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=FORMATO ESCOLHIDO: {{ $('Basic LLM Chain').item.json.output.linkedin.formato }}\n\nJUSRIFICATIVA: {{ $('Basic LLM Chain').item.json.output.linkedin.justificativa }}\n\nDIREÇÃO DO DIRETOR: \n- ESTRATEGIA GERAL: {{ $('Basic LLM Chain').item.json.output.estrategia_geral }}\n\n- ÂNGULO UNICO: {{ $('Basic LLM Chain').item.json.output.angulo_unico }}\n\n- TOM GERAL: {{ $('Basic LLM Chain').item.json.output.tom_geral }}\n\nINSIGHTS: {{ $('Summarization Chain').item.json.output.text }}\n\nTEMA: {{ $('Information Extractor').item.json.output.tema }}\n\nPUBLICO_ALVO: {{ $('Information Extractor').item.json.output.publico_alvo }}",
+        "hasOutputParser": true,
+        "needsFallback": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Você é um especialista em LinkedIn. O Diretor escolheu o formato. Adapte:\nSE \"post_texto\":\n- 200-300 palavras\n- Estrutura: HOOK (1 frase forte), STORY/CONTEXTO, INSIGHT/LICAO (3-5 pontos),\nCTA (pergunta)\n- Use quebras de linha para legibilidade\n- 3-5 hashtags no fim\nSE \"carrossel_pdf\":\n- 8-10 slides em markdown\n- Slide 1: CAPA (título impactante + subtítulo)\n- Slides 2-9: 1 ideia por slide (título curto + 2-3 linhas)\n- Slide final: CTA (salve, compartilhe, comente)\n- Cada slide formatado: ## Slide N: Título\\nCorpo do slide\n- Inclua legenda do post (~150 palavras) no fim\nRetorne JSON estrito."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        2976,
+        496
+      ],
+      "id": "e7fd6d56-6fb4-44a4-982e-bb513c6275a8",
+      "name": "Redator Linkedin"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=FORMATO ESCOLHIDO: {{ $('Basic LLM Chain').item.json.output.instagram.formato }}\n\nJUSRIFICATIVA: {{ $('Basic LLM Chain').item.json.output.instagram.justificativa }}\n\nDIREÇÃO DO DIRETOR: \n- ESTRATEGIA GERAL: {{ $('Basic LLM Chain').item.json.output.estrategia_geral }}\n\n- ÂNGULO UNICO: {{ $('Basic LLM Chain').item.json.output.angulo_unico }}\n\n- TOM GERAL: {{ $('Basic LLM Chain').item.json.output.tom_geral }}\n\nINSIGHTS: {{ $('Summarization Chain').item.json.output.text }}\n\nTEMA: {{ $('Information Extractor').item.json.output.tema }}\n\nPUBLICO_ALVO: {{ $('Information Extractor').item.json.output.publico_alvo }}",
+        "hasOutputParser": true,
+        "needsFallback": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Você é um social media para Instagram. O Diretor escolheu o formato. Adapte: SE \"carrossel\": - 6-8 slides em markdown - Slide 1: capa (max 6 palavras) + subtítulo - Slides 2-7: didático (titulo curto + corpo max 30 palavras) - Slide 8: CTA - Cada slide: ## Slide N: Título\\nCorpo do slide - Legenda do post no fim (~150 palavras + hashtags) SE \"stories\": - 5-8 cards em markdown - Cada card: ## Story N - [tipo]\\nTexto curto e visual - Tipos: enquete, caixa de pergunta, contagem regressiva, texto puro, sticker de música - Cada card tem máximo 15 palavras - Mais informal que carrossel SE \"post_estatico\": - 1 imagem + legenda - Bloco 1: DESCRICAO DA IMAGEM (o que aparece, cores, mood) - Bloco 2: LEGENDA (~250 palavras com hashtags) - Bloco 3: CTA + comentário pin Retorne JSON estrito."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        2976,
+        896
+      ],
+      "id": "15ec5c56-33c4-4c69-938f-e04aad0b1974",
+      "name": "redator Instagram"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=FORMATO ESCOLHIDO: {{ $('Basic LLM Chain').item.json.output.video.formato }}\n\nJUSRIFICATIVA: {{ $('Basic LLM Chain').item.json.output.video.justificativa }}\n\nDIREÇÃO DO DIRETOR: \n- ESTRATEGIA GERAL: {{ $('Basic LLM Chain').item.json.output.estrategia_geral }}\n\n- ÂNGULO UNICO: {{ $('Basic LLM Chain').item.json.output.angulo_unico }}\n\n- TOM GERAL: {{ $('Basic LLM Chain').item.json.output.tom_geral }}\n\nINSIGHTS: {{ $('Summarization Chain').item.json.output.text }}\n\nTEMA: {{ $('Information Extractor').item.json.output.tema }}\n\nPUBLICO_ALVO: {{ $('Information Extractor').item.json.output.publico_alvo }}",
+        "hasOutputParser": true,
+        "needsFallback": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "ocê é um roteirista profissional. O Diretor escolheu o formato. Adapte: SE \"youtube_longo\": - Roteiro de 8-12 minutos - Inclua TIMESTAMPS [00:00], [01:30], etc - Estrutura: HOOK (30s), INTRO (1min), 3-5 PONTOS PROFUNDOS com exemplos, CONCLUSÃO, CTA para inscrever-se - Linguagem articulada, profunda, com transições claras SE \"reels_shorts\": - Roteiro de 30-60 segundos - HOOK super agressivo nos primeiros 3 segundos - 3-4 frases de impacto - CTA visual no final (\"Salva esse para depois\") - Linguagem rápida, frases curtas, marcadores [CORTE], [B-ROLL], [TEXTO NA TELA] Retorne JSON estrito. O campo \"conteudo_markdown\" tem o roteiro completo formatado."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        2976,
+        -128
+      ],
+      "id": "e03d7c05-7115-444a-bf01-763f0fdef819",
+      "name": "Redator Video"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=FORMATO ESCOLHIDO: {{ $('Basic LLM Chain').item.json.output.twitter.formato }}\n\nJUSRIFICATIVA: {{ $('Basic LLM Chain').item.json.output.twitter.justificativa }}\n\nDIREÇÃO DO DIRETOR: \n- ESTRATEGIA GERAL: {{ $('Basic LLM Chain').item.json.output.estrategia_geral }}\n\n- ÂNGULO UNICO: {{ $('Basic LLM Chain').item.json.output.angulo_unico }}\n\n- TOM GERAL: {{ $('Basic LLM Chain').item.json.output.tom_geral }}\n\nINSIGHTS: {{ $('Summarization Chain').item.json.output.text }}\n\nTEMA: {{ $('Information Extractor').item.json.output.tema }}\n\nPUBLICO_ALVO: {{ $('Information Extractor').item.json.output.publico_alvo }}",
+        "hasOutputParser": true,
+        "needsFallback": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Você é um copywriter para Twitter/X. O Diretor escolheu o formato. Adapte: SE \"thread\": - 8-12 tweets - Cada tweet MAX 280 caracteres - Tweet 1: HOOK que vende a thread (curiosidade, contradição, dado) - Tweets 2-N: insights, dados, exemplos - Ultimo tweet: CTA (follow, save, RT) - Formato: **Tweet 1:** texto\\n\\n**Tweet 2:** texto\\n... SE \"post_viral\": - 1 único tweet de alto impacto - MAX 280 caracteres - Tipos válidos: contradição, dado chocante, opinião polêmica, observação incisiva - Sem hashtags - Indique 2-3 variantes do tweet para A/B test Retorne JSON estrito."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        2976,
+        1296
+      ],
+      "id": "32881c6a-5936-42b0-b3d5-62df29023143",
+      "name": "Redator Twitter"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=FORMATO ESCOLHIDO: {{ $('Basic LLM Chain').item.json.output.newsletter.formato }}\n\nJUSRIFICATIVA: {{ $('Basic LLM Chain').item.json.output.newsletter.justificativa }}\n\nDIREÇÃO DO DIRETOR: \n- ESTRATEGIA GERAL: {{ $('Basic LLM Chain').item.json.output.estrategia_geral }}\n\n- ÂNGULO UNICO: {{ $('Basic LLM Chain').item.json.output.angulo_unico }}\n\n- TOM GERAL: {{ $('Basic LLM Chain').item.json.output.tom_geral }}\n\nINSIGHTS: {{ $('Summarization Chain').item.json.output.text }}\n\nTEMA: {{ $('Information Extractor').item.json.output.tema }}\n\nPUBLICO_ALVO: {{ $('Information Extractor').item.json.output.publico_alvo }}",
+        "hasOutputParser": true,
+        "needsFallback": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Você é um editor de newsletter. O Diretor escolheu o formato. Adapte: SE \"normal\": - 400-600 palavras - Estrutura: ASSUNTO (impactante), INTRODUCAO (gancho), DESENVOLVIMENTO (2-3 secoes com sub-títulos), TAKEAWAY (1 frase), CTA - Use markdown - Tom direto, opinativo, com dados SE \"breaking_curto\": - 150 palavras max - Estrutura: ASSUNTO URGENTE (com BREAKING ou ALERTA), 1 parágrafo expondo o fato, 1 parágrafo do impacto, 1 frase de próximo passo - Tom urgente, telegráfico, jornalístico Retorne JSON estrito."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        2976,
+        1808
+      ],
+      "id": "0627f264-66b0-44d2-9be6-efcb2a171a46",
+      "name": "Redator Newsletter"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        2992,
+        320
+      ],
+      "id": "4564967b-b8b6-44c9-a37c-57e0d873bd0a",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "JLunU5A85fhpAW8T",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        2976,
+        64
+      ],
+      "id": "26211eaf-47f1-42d8-a99f-edab8f7b92df",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "FzX5bnxNDugJc8HZ",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n \"formato\":\"reels_shorts\",\n \"titulo\":\"Título\",\n \"conteudo_markdown\":\"# Roteiro markdown\",\n \"notas_estrategicas\":\"Notas\"\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        3072,
+        112
+      ],
+      "id": "11da900d-24fd-48a1-a7fe-7af63a89e92e",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "operation": "createFromText",
+        "content": "=Titulo:  {{ $json.output.titulo }}\n\n**Formato escolhido:** {{ $json.output.formato }}\n**notas estrategicas:** {{ $json.output.notas_estrategicas }}\n\n----\n\n{{ $json.output.conteudo_markdown }}",
+        "name": "=Video ({{ $json.output.formato }}).md",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('Create folder').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {
+          "convertToGoogleDocument": true
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        3440,
+        96
+      ],
+      "id": "48bf47e8-81ff-4b2f-8e7d-08c3aedcc1f9",
+      "name": "Create file from text",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "qusX6GylAkmdXjxU",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n \"formato\":\"carrossel_pdf\",\n \"titulo\":\"Título\",\n \"conteudo_markdown\":\"# Conteudo\",\n \"notas_estrategicas\":\"Notas\"\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2960,
+        720
+      ],
+      "id": "fda84296-fc58-4e72-a6eb-3e183d824139",
+      "name": "Structured Output Parser2"
+    },
+    {
+      "parameters": {
+        "operation": "createFromText",
+        "content": "=Titulo:  {{ $json.output.titulo }}\n\n**Formato escolhido:** {{ $json.output.formato }}\n**notas estrategicas:** {{ $json.output.notas_estrategicas }}\n\n----\n\n{{ $json.output.conteudo_markdown }}",
+        "name": "=Linkedin ({{ $json.output.formato }}).md",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('Create folder').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {
+          "convertToGoogleDocument": true
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        3440,
+        608
+      ],
+      "id": "7bc959a6-93da-44f7-aac5-a9038b69fe07",
+      "name": "Create file from text1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "qusX6GylAkmdXjxU",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        2544,
+        1472
+      ],
+      "id": "4ac16101-806d-4d6e-970d-1a341c5e3add",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "FzX5bnxNDugJc8HZ",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "createFromText",
+        "content": "=Titulo:  {{ $json.output.titulo }}\n\n**Formato escolhido:** {{ $json.output.formato }}\n**notas estrategicas:** {{ $json.output.notas_estrategicas }}\n\n----\n\n{{ $json.output.conteudo_markdown }}",
+        "name": "=Instagram ({{ $json.output.formato }}).md",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('Create folder').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {
+          "convertToGoogleDocument": true
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        3440,
+        1008
+      ],
+      "id": "a51db0ea-e275-4916-83ff-bf66efa6484f",
+      "name": "Create file from text2",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "qusX6GylAkmdXjxU",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n \"formato\":\"carrossel_pdf\",\n \"titulo\":\"Título\",\n \"conteudo_markdown\":\"# Conteudo\",\n \"notas_estrategicas\":\"Notas\"\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2960,
+        1120
+      ],
+      "id": "a4a01c96-688c-42e6-bedd-a0d82d6ef3bc",
+      "name": "Structured Output Parser3"
+    },
+    {
+      "parameters": {
+        "operation": "createFromText",
+        "content": "=Titulo:  {{ $json.output.titulo }}\n\n**Formato escolhido:** {{ $json.output.formato }}\n**notas estrategicas:** {{ $json.output.notas_estrategicas }}\n\n----\n\n{{ $json.output.conteudo_markdown }}",
+        "name": "=Twitter ({{ $json.output.formato }}).md",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('Create folder').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {
+          "convertToGoogleDocument": true
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        3440,
+        1408
+      ],
+      "id": "d5a39ad1-be83-4564-a2ac-243746760403",
+      "name": "Create file from text3",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "qusX6GylAkmdXjxU",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n \"formato\":\"carrossel_pdf\",\n \"titulo\":\"Título\",\n \"conteudo_markdown\":\"# Conteudo\",\n \"notas_estrategicas\":\"Notas\"\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2960,
+        1520
+      ],
+      "id": "4d950bc9-d68f-4207-a769-5b090d95542b",
+      "name": "Structured Output Parser4"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n \"formato\":\"carrossel_pdf\",\n \"titulo\":\"Título\",\n \"conteudo_markdown\":\"# Conteudo\",\n \"notas_estrategicas\":\"Notas\"\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2960,
+        2032
+      ],
+      "id": "acac49a0-e83f-4f39-829e-29d195f6dedb",
+      "name": "Structured Output Parser5"
+    },
+    {
+      "parameters": {
+        "operation": "createFromText",
+        "content": "=Titulo:  {{ $json.output.titulo }}\n\n**Formato escolhido:** {{ $json.output.formato }}\n**notas estrategicas:** {{ $json.output.notas_estrategicas }}\n\n----\n\n{{ $json.output.conteudo_markdown }}",
+        "name": "=newsletter ({{ $json.output.formato }}).md",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('Create folder').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {
+          "convertToGoogleDocument": true
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        3440,
+        1808
+      ],
+      "id": "a6bc3af9-8758-4f15-af2e-c82ecfe9b51c",
+      "name": "Create file from text4",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "qusX6GylAkmdXjxU",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=<b>Conteudo pronto !</b>\n\n<b>Estrategia:</b> {{ $('Basic LLM Chain').item.json.output.estrategia_geral }}\n\n<b>Angulo Unico:</b> {{ $('Basic LLM Chain').item.json.output.angulo_unico }}\n\n<b>Formatos Escolhidos:</b>\n- Video:{{ $('Basic LLM Chain').item.json.output.video.formato }}\n- LinkedIn:{{ $('Basic LLM Chain').item.json.output.linkedin.formato }}\n- Instagram:{{ $('Basic LLM Chain').item.json.output.instagram.formato }}\n- Twitter:{{ $('Basic LLM Chain').item.json.output.twitter.formato }}\n- Newsletter: {{ $('Basic LLM Chain').item.json.output.newsletter.formato }}\n\n<b>Pasta do Drive:</b>\nhttps://drive.google.com/drive/folders/{{ $('Create folder').item.json.id }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3888,
+        1008
+      ],
+      "id": "c1017e46-4180-426d-bdb2-80689a5c3652",
+      "name": "Send a text message",
+      "webhookId": "66872403-e11d-49f7-89d2-ed4cbefc9e8b",
+      "credentials": {
+        "telegramApi": {
+          "id": "3I7GFwBU9ehhQew4",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 5,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3664,
+        960
+      ],
+      "id": "5b865b22-d566-4780-82b0-d1284f72d6d2",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        2208,
+        1312
+      ],
+      "id": "1cd4d7a1-ade0-4c7a-a2ae-074ede443f8e",
+      "name": "Google Gemini Chat Model3",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "FzX5bnxNDugJc8HZ",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Summarization Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search": {
+      "main": [
+        [
+          {
+            "node": "Summarization Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarization Chain": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Create folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create folder": {
+      "main": [
+        [
+          {
+            "node": "Redator Video",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Redator Linkedin",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "redator Instagram",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Redator Twitter",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Redator Newsletter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Redator Linkedin",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "redator Instagram",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Redator Twitter",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Redator Newsletter",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Redator Video",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Structured Output Parser2",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Structured Output Parser3",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Structured Output Parser4",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Structured Output Parser5",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Redator Video",
+            "type": "ai_languageModel",
+            "index": 1
+          },
+          {
+            "node": "Redator Linkedin",
+            "type": "ai_languageModel",
+            "index": 1
+          },
+          {
+            "node": "redator Instagram",
+            "type": "ai_languageModel",
+            "index": 1
+          },
+          {
+            "node": "Redator Twitter",
+            "type": "ai_languageModel",
+            "index": 1
+          },
+          {
+            "node": "Redator Newsletter",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Redator Video",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redator Video": {
+      "main": [
+        [
+          {
+            "node": "Create file from text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser2": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Redator Linkedin",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redator Linkedin": {
+      "main": [
+        [
+          {
+            "node": "Create file from text1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "redator Instagram": {
+      "main": [
+        [
+          {
+            "node": "Create file from text2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser3": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "redator Instagram",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redator Twitter": {
+      "main": [
+        [
+          {
+            "node": "Create file from text3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser4": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Redator Twitter",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redator Newsletter": {
+      "main": [
+        [
+          {
+            "node": "Create file from text4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser5": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Redator Newsletter",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create file from text": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create file from text1": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Create file from text2": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Create file from text3": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Create file from text4": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        []
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "6cbfbe0c-5ecb-4a4c-be91-5c36f4537dfc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6c3889d4f07f5d827608b76c51048a7200d2b7e2e3a45be3d8066eaf09599abc"
+  },
+  "nodeGroups": [
+    {
+      "id": "4efe33f1-8939-4bfd-94ec-be7043b939f4",
+      "name": "Group 1",
+      "nodeIds": []
+    }
+  ],
+  "id": "wDXY9GDEtEE871y8",
+  "tags": []
+}
